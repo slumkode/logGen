@@ -1,0 +1,17 @@
+{
+    "logs_per_file": 50,
+    "interval_between_logs": 5,
+    "aggressiveness_factor": 50,
+    "applications": [
+        "app01",
+        "app02",
+        "app03",
+        "app04",
+        "app05",
+        "app06",
+        "app07",
+        "app08",
+        "app09",
+        "app00"
+    ]
+}

@@ -10,6 +10,22 @@ function executeCommand($command)
     return [$output, $resultCode];
 }
 
+// Load configuration from the config.json file
+function loadConfig($configFile)
+{
+    if (!file_exists($configFile)) {
+        die("Error: Configuration file {$configFile} not found.\n");
+    }
+    $config = json_decode(file_get_contents($configFile), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        die("Error: Failed to parse the configuration file.\n");
+    }
+    return $config;
+}
+
+// Read configuration from config.json
+$config = loadConfig('config.json');
+
 // Check if Monolog is installed
 if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
     echo "Monolog is not installed. Installing dependencies...\n";
@@ -49,19 +65,16 @@ function getRandomLogLevel($logLevels)
 }
 
 // Function to create log files and log messages
-function generateLogs($logsPerFile = 50, $intervalBetweenLogs = 5, $aggressivenessFactor = 50)
+function generateLogs($config)
 {
     $log_date_format = 'Y-m-d'; // Define log date format
-
-    // Define the list of application names
-    $applications = ['app01', 'app02', 'app03', 'app04', 'app05', 'app06', 'app07', 'app08', 'app09', 'app00'];
 
     // Get the current date in the specified format
     $currentDate = date($log_date_format);
 
     // Continuous loop for log generation
     while (true) {
-        foreach ($applications as $app) {
+        foreach ($config['applications'] as $app) {
             // Fork a new process for each log file generation
             $pid = pcntl_fork();
 
@@ -72,7 +85,6 @@ function generateLogs($logsPerFile = 50, $intervalBetweenLogs = 5, $aggressivene
                 continue;
             } else {
                 // Child process: generates logs for a specific app
-
                 $logFileName = "{$app}_{$currentDate}.log";
             
                 // Create a new logger instance for each application
@@ -94,7 +106,7 @@ function generateLogs($logsPerFile = 50, $intervalBetweenLogs = 5, $aggressivene
                 $logger->pushHandler($handler);
     
                 // Generate logs at an increased rate with random intensity
-                for ($i = 0; $i < $logsPerFile; $i++) {
+                for ($i = 0; $i < $config['logs_per_file']; $i++) {
                     $logLevel = getRandomLogLevel($GLOBALS['logLevels']);
                     $logger->log($logLevel, "This is a {$GLOBALS['logLevels'][$logLevel]} message.");
     
@@ -103,15 +115,14 @@ function generateLogs($logsPerFile = 50, $intervalBetweenLogs = 5, $aggressivene
                     usleep($randomSleep); // sleep between log entries
                 }
     
-                echo "Generated {$logsPerFile} logs in {$logFileName}\n";
+                echo "Generated {$config['logs_per_file']} logs in {$logFileName}\n";
                 
                 exit(); // End the child process after completing its task
-                
             }
         }
 
         // Sleep between iterations to avoid continuous overload, adjust as necessary
-        usleep($intervalBetweenLogs * 1000000); // Sleep for the defined interval between iterations (in microseconds)
+        usleep($config['interval_between_logs'] * 1000000); // Sleep for the defined interval between iterations (in microseconds)
 
         // Collect child processes to avoid defunct processes
         while (pcntl_waitpid(0, $status, WNOHANG) > 0) {
@@ -120,5 +131,5 @@ function generateLogs($logsPerFile = 50, $intervalBetweenLogs = 5, $aggressivene
     }
 }
 
-// Run the log generation with a defined number of logs per file
-generateLogs(200, 1); // 200 logs per file, 5 seconds interval between iterations
+// Run the log generation with the configuration read from the file
+generateLogs($config);

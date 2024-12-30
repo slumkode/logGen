@@ -93,8 +93,8 @@ Generates logs for each application using multiple child processes.
 Clone this repository to your local machine using Git.
 
 ```bash
-git clone https://github.com/yourusername/log-generation-script.git
-cd log-generation-script
+git clone https://github.com/slumkode/logGen.git
+cd logGen
 ```
 
 ### Step 2: Install Dependencies
