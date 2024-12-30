@@ -1,7 +1,16 @@
 {
-    "logs_per_file": 50,
-    "interval_between_logs": 5,
-    "aggressiveness_factor": 50,
+    "logs_per_file": 2,
+    "interval_between_logs": 1,
+    "log_levels_weights": {
+        "DEBUG": 1,
+        "INFO": 20,
+        "NOTICE": 0,
+        "WARNING": 0,
+        "ERROR": 1,
+        "CRITICAL": 0,
+        "ALERT": 0,
+        "EMERGENCY": 0
+    },
     "applications": [
         "app01",
         "app02",

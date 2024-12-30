@@ -58,10 +58,16 @@ $logLevels = [
     Logger::EMERGENCY => 'EMERGENCY'
 ];
 
-// Function to generate a random log level
-function getRandomLogLevel($logLevels)
+// Function to generate a random log level based on weights
+function getRandomLogLevel($logLevels, $weights)
 {
-    return array_rand($logLevels);
+    $logLevelsWithWeights = [];
+    foreach ($logLevels as $level => $name) {
+        // Repeat the log level according to its weight
+        $logLevelsWithWeights = array_merge($logLevelsWithWeights, array_fill(0, $weights[$name], $level));
+    }
+    // Choose a random log level based on weights
+    return $logLevelsWithWeights[array_rand($logLevelsWithWeights)];
 }
 
 // Function to create log files and log messages
@@ -107,7 +113,8 @@ function generateLogs($config)
     
                 // Generate logs at an increased rate with random intensity
                 for ($i = 0; $i < $config['logs_per_file']; $i++) {
-                    $logLevel = getRandomLogLevel($GLOBALS['logLevels']);
+                    // Use weights from config to select log level
+                    $logLevel = getRandomLogLevel($GLOBALS['logLevels'], $config['log_levels_weights']);
                     $logger->log($logLevel, "This is a {$GLOBALS['logLevels'][$logLevel]} message.");
     
                     // Randomized sleep time to make the log generation more aggressive but optimized
